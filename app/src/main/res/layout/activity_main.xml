@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/cream_bg">
+
+    <!-- TOP SECTION: Logo + Report Today + Fix Tomorrow -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="40dp"
+        android:paddingBottom="8dp">
+
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:src="@drawable/logo_fixmycity"/>
+
+        <TextView
+            android:id="@+id/tvReportToday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Today"
+            android:textSize="20sp"
+            android:textColor="@color/gray_text"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:id="@+id/tvFixTomorrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fix Tomorrow"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#1A237E"
+            android:layout_marginTop="4dp"/>
+
+    </LinearLayout>
+
+    <!-- MIDDLE SECTION: City Image -->
+    <ImageView
+        android:id="@+id/imgCity"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/city_bg"
+        android:scaleType="centerCrop"/>
+
+    <!-- BOTTOM SECTION: Two shapes + Buttons -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Vector5 — back shape (lighter, behind) -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/vector_5"
+            android:scaleType="fitXY"/>
+
+        <!-- Vector4 — front shape (darker green, on top) -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/vector_4"
+            android:scaleType="fitXY"
+            android:layout_marginTop="10dp"/>
+
+    <!-- Buttons on top of shapes -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="140dp"
+        android:paddingBottom="120dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp">
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Login"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/green_primary"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Sign Up"
+            android:textColor="@color/green_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/white"/>
+
+    </LinearLayout>
+
+
+
+    </FrameLayout>
+
+</LinearLayout>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "724962988073",
+    "project_id": "fixmycity-602c6",
+    "storage_bucket": "fixmycity-602c6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724962988073:android:a35060213c44a77d058c38",
+        "android_client_info": {
+          "package_name": "com.example.fixmycity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWGiG4fTQk9u9eyy86n6fLEQoIH2bdL04"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
