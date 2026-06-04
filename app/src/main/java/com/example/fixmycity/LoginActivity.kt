@@ -22,92 +22,195 @@ class LoginActivity : AppCompatActivity() {
 
         // Role Spinner
         val spinnerRole = findViewById<Spinner>(R.id.spinnerRole)
-        val roles = listOf("Select Role", "User", "Admin")
-        val adapter = ArrayAdapter(this,
-            android.R.layout.simple_spinner_item, roles)
+
+        val roles = listOf(
+            "Select Role",
+            "User",
+            "Admin"
+        )
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            roles
+        )
+
         adapter.setDropDownViewResource(
-            android.R.layout.simple_spinner_dropdown_item)
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
         spinnerRole.adapter = adapter
 
-        // Login button
-        findViewById<Button>(R.id.btnLogin).setOnClickListener {
-            loginUser()
-        }
+        // Login Button
+        findViewById<Button>(R.id.btnLogin)
+            .setOnClickListener {
 
-        // Sign up link
-        findViewById<TextView>(R.id.tvSignUp).setOnClickListener {
-            startActivity(Intent(this, SignupActivity::class.java))
-        }
+                loginUser()
+            }
+
+        // Sign Up Link
+        findViewById<TextView>(R.id.tvSignUp)
+            .setOnClickListener {
+
+                startActivity(
+                    Intent(
+                        this,
+                        SignupActivity::class.java
+                    )
+                )
+            }
     }
 
     private fun loginUser() {
-        val email = findViewById<EditText>(R.id.etEmail).text.toString().trim()
-        val password = findViewById<EditText>(R.id.etPassword).text.toString().trim()
-        val selectedRole = findViewById<Spinner>(R.id.spinnerRole).selectedItem.toString()
+
+        val email = findViewById<EditText>(
+            R.id.etEmail
+        ).text.toString().trim()
+
+        val password = findViewById<EditText>(
+            R.id.etPassword
+        ).text.toString().trim()
+
+        val selectedRole = findViewById<Spinner>(
+            R.id.spinnerRole
+        ).selectedItem.toString()
+
+        // Validation
 
         if (email.isEmpty() || password.isEmpty()) {
+
             showError("Please enter email and password!")
             return
         }
+
         if (selectedRole == "Select Role") {
+
             showError("Please select a role!")
             return
         }
 
+        // Firebase Login
+
         auth.signInWithEmailAndPassword(email, password)
+
             .addOnCompleteListener { task ->
+
                 if (task.isSuccessful) {
+
                     val userId = auth.currentUser?.uid
 
-                    db.collection("users").document(userId!!)
+                    db.collection("users")
+                        .document(userId!!)
                         .get()
+
                         .addOnSuccessListener { document ->
-                            val userRole = document.getString("role")
+
+                            val userRole =
+                                document.getString("role")
 
                             if (userRole == selectedRole) {
+
                                 showSuccess("Welcome back! 👋")
 
+                                // ADMIN LOGIN
+
                                 if (userRole == "Admin") {
-                                    showError("Admin login - coming soon!")
-                                } else {
-                                    startActivity(Intent(this,
-                                        CitizenHomeActivity::class.java))
+
+                                    startActivity(
+                                        Intent(
+                                            this,
+                                            AdminDashboardActivity::class.java
+                                        )
+                                    )
+
+                                    finish()
+
+                                }
+
+                                // USER LOGIN
+
+                                else {
+
+                                    startActivity(
+                                        Intent(
+                                            this,
+                                            CitizenHomeActivity::class.java
+                                        )
+                                    )
+
                                     finish()
                                 }
+
                             } else {
-                                showError("Wrong role selected! Please check your role.")
+
+                                showError(
+                                    "Wrong role selected! Please check your role."
+                                )
+
                                 auth.signOut()
                             }
                         }
+
                         .addOnFailureListener {
-                            showError("Error fetching user data. Try again!")
+
+                            showError(
+                                "Error fetching user data. Try again!"
+                            )
                         }
+
                 } else {
-                    showError("Login failed: ${task.exception?.message}")
+
+                    showError(
+                        "Login failed: ${task.exception?.message}"
+                    )
                 }
             }
     }
 
+    // ERROR MESSAGE
+
     private fun showError(message: String) {
+
         val snackbar = Snackbar.make(
             findViewById(android.R.id.content),
             message,
             Snackbar.LENGTH_LONG
         )
-        snackbar.setBackgroundTint(android.graphics.Color.parseColor("#D32F2F"))
-        snackbar.setTextColor(android.graphics.Color.WHITE)
-        snackbar.setAction("OK") { snackbar.dismiss() }
+
+        snackbar.setBackgroundTint(
+            android.graphics.Color.parseColor("#D32F2F")
+        )
+
+        snackbar.setTextColor(
+            android.graphics.Color.WHITE
+        )
+
+        snackbar.setAction("OK") {
+
+            snackbar.dismiss()
+        }
+
         snackbar.show()
     }
 
+    // SUCCESS MESSAGE
+
     private fun showSuccess(message: String) {
+
         val snackbar = Snackbar.make(
             findViewById(android.R.id.content),
             message,
             Snackbar.LENGTH_LONG
         )
-        snackbar.setBackgroundTint(android.graphics.Color.parseColor("#1E6F43"))
-        snackbar.setTextColor(android.graphics.Color.WHITE)
+
+        snackbar.setBackgroundTint(
+            android.graphics.Color.parseColor("#1E6F43")
+        )
+
+        snackbar.setTextColor(
+            android.graphics.Color.WHITE
+        )
+
         snackbar.show()
     }
 }

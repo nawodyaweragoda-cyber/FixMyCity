@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" /> <!-- Camera feature -->
+        android:maxSdkVersion="32" />
+
+    <!-- Camera Feature -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -21,42 +25,83 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FixMyCity"
         tools:targetApi="31">
+
+        <!-- Citizen Activities -->
+
         <activity
             android:name=".MyIssuesActivity"
             android:exported="false" />
+
         <activity
             android:name=".ReportIssueActivity"
             android:exported="false" />
+
         <activity
             android:name=".ProfileActivity"
             android:exported="false" />
+
         <activity
             android:name=".CitizenHomeActivity"
-            android:exported="false" /> <!-- FileProvider for camera -->
+            android:exported="false" />
+
+        <!-- ADMIN DASHBOARD -->
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MoneyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TransactionHistoryActivity"
+            android:exported="false" />
+
+
+        <!-- FileProvider for Camera -->
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
+
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider> <!-- Signup Screen -->
+
+        </provider>
+
+        <!-- Signup -->
+
         <activity
             android:name=".SignupActivity"
-            android:exported="false" /> <!-- Login Screen -->
+            android:exported="false" />
+
+
+        <!-- Login -->
+
         <activity
             android:name=".LoginActivity"
-            android:exported="false" /> <!-- Splash Screen (Main/Launcher) -->
+            android:exported="false" />
+
+        <!-- Main Launcher -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
             <intent-filter>
+
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+
         </activity>
+
     </application>
 
 </manifest>

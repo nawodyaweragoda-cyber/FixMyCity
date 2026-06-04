@@ -9,4 +9,8 @@
     <color name="status_pending">#F7931E</color>
     <color name="status_inprogress">#3A86FF</color>
     <color name="status_resolved">#1E6F43</color>
+    <color name="Withdraw">#FF5722</color>
+    <color name="In_Progress">#2196F3</color>
+    <color name="Delete">#D32F2F</color>
+
 </resources>
