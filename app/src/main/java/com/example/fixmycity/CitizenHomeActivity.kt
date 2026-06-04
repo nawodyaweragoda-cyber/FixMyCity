@@ -42,10 +42,16 @@ class CitizenHomeActivity : AppCompatActivity() {
 
         // Bottom Nav
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener { }
+
         findViewById<LinearLayout>(R.id.navReport).setOnClickListener {
             startActivity(Intent(this, ReportIssueActivity::class.java))
         }
-        findViewById<LinearLayout>(R.id.navNotification).setOnClickListener { }
+
+        findViewById<LinearLayout>(R.id.navNotification).setOnClickListener {
+            val intent = Intent(this, NotificationActivity::class.java)
+            startActivity(intent)
+        }
+
         findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
