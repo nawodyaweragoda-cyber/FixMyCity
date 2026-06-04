@@ -1,6 +1,7 @@
 package com.example.fixmycity
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -28,36 +29,6 @@ class ProfileActivity : AppCompatActivity() {
     private var cameraImageUri: Uri? = null
     private var selectedImageUri: Uri? = null
 
-    // Gallery picker
-    private val galleryLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            selectedImageUri = it
-            imgProfile.setImageURI(it)
-            imgProfile.scaleType = ImageView.ScaleType.CENTER_CROP
-        }
-    }
-
-    // Camera launcher
-    private val cameraLauncher = registerForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            selectedImageUri = cameraImageUri
-            imgProfile.setImageURI(cameraImageUri)
-            imgProfile.scaleType = ImageView.ScaleType.CENTER_CROP
-        }
-    }
-
-    // Camera permission
-    private val cameraPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) openCamera()
-        else showError("Camera permission denied!")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
@@ -70,43 +41,95 @@ class ProfileActivity : AppCompatActivity() {
         etCity = findViewById(R.id.etCity)
         imgProfile = findViewById(R.id.imgProfile)
 
-        // Click profile image to change
         imgProfile.setOnClickListener {
             showImagePickerDialog()
         }
 
-        // Load user data from Firestore
         loadUserData()
 
-        // Save button
         findViewById<Button>(R.id.btnSave).setOnClickListener {
             saveUserData()
         }
 
-        // Back button
         findViewById<TextView>(R.id.btnBack).setOnClickListener {
             finish()
         }
 
-        // Logout
         findViewById<TextView>(R.id.btnLogout).setOnClickListener {
             auth.signOut()
-            val intent = android.content.Intent(this, MainActivity::class.java)
-            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
-                    android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
         }
+        findViewById<Button>(R.id.btnDeleteAccount)
+            .setOnClickListener {
 
-        // Bottom nav
+                val user = FirebaseAuth.getInstance().currentUser
+
+                AlertDialog.Builder(this)
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account?")
+                    .setPositiveButton("Yes") { _, _ ->
+
+                        user?.delete()
+                            ?.addOnSuccessListener {
+
+                                Toast.makeText(
+                                    this,
+                                    "Account Deleted",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // go to main screen
+                                val intent = Intent(this, MainActivity::class.java)
+                                intent.flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
+                            ?.addOnFailureListener {
+
+                                Toast.makeText(
+                                    this,
+                                    "Delete Failed (login again required)",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+
+        // NAVIGATION
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
-            startActivity(android.content.Intent(this, CitizenHomeActivity::class.java))
+            startActivity(Intent(this, CitizenHomeActivity::class.java))
             finish()
+        }
+
+        findViewById<LinearLayout>(R.id.navReport).setOnClickListener {
+            startActivity(Intent(this, ReportIssueActivity::class.java))
+            finish()
+        }
+
+        findViewById<LinearLayout>(R.id.navNotification).setOnClickListener {
+            startActivity(Intent(this, NotificationActivity::class.java))
+            finish()
+        }
+        // PROFILE
+        findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
+
+
         }
     }
 
+
+    // ================= IMAGE PICK =================
+
     private fun showImagePickerDialog() {
-        val options = arrayOf("📷  Take Photo", "🖼️  Choose from Gallery", "Cancel")
+        val options = arrayOf("📷 Take Photo", "🖼️ Gallery", "Cancel")
+
         AlertDialog.Builder(this)
             .setTitle("Change Profile Photo")
             .setItems(options) { dialog, which ->
@@ -118,127 +141,97 @@ class ProfileActivity : AppCompatActivity() {
             }.show()
     }
 
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                selectedImageUri = it
+                imgProfile.setImageURI(it)
+            }
+        }
+
+    private val cameraLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                cameraImageUri?.let { uri ->
+                    selectedImageUri = uri
+                    imgProfile.setImageURI(uri)
+                }
+            }
+        }
+
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) openCamera()
+            else showError("Camera permission denied")
+        }
+
     private fun checkCameraPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this, Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> openCamera()
-            else -> cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            openCamera()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
     private fun openCamera() {
-        val photoFile = File(cacheDir, "profile_${System.currentTimeMillis()}.jpg")
-        val uri = FileProvider.getUriForFile(
-            this, "${packageName}.fileprovider", photoFile)
-        cameraImageUri = uri
-        cameraLauncher.launch(uri)
+        val file = File(cacheDir, "profile_${System.currentTimeMillis()}.jpg")
+
+        cameraImageUri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            file
+        )
+
+        // ✅ FIX (NO CRASH)
+        cameraImageUri?.let {
+            cameraLauncher.launch(it)
+        }
     }
 
+    // ================= FIRESTORE =================
+
     private fun loadUserData() {
-        val userId = auth.currentUser?.uid ?: return
+        val uid = auth.currentUser?.uid ?: return
 
-        db.collection("users").document(userId)
+        db.collection("users").document(uid)
             .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    etName.setText(document.getString("fullName") ?: "")
-                    etEmail.setText(document.getString("email") ?: "")
-                    etCity.setText(document.getString("city") ?: "")
-
-                    // Load saved local photo path
-                    val localPath = document.getString("localPhotoPath")
-                    if (!localPath.isNullOrEmpty()) {
-                        val file = File(localPath)
-                        if (file.exists()) {
-                            imgProfile.setImageURI(Uri.fromFile(file))
-                            imgProfile.scaleType = ImageView.ScaleType.CENTER_CROP
-                        }
-                    }
-                }
-            }
-            .addOnFailureListener {
-                showError("Failed to load profile!")
+            .addOnSuccessListener { doc ->
+                etName.setText(doc.getString("fullName"))
+                etEmail.setText(doc.getString("email"))
+                etCity.setText(doc.getString("city"))
             }
     }
 
     private fun saveUserData() {
-        val userId = auth.currentUser?.uid ?: return
+        val uid = auth.currentUser?.uid ?: return
 
-        val name = etName.text.toString().trim()
-        val email = etEmail.text.toString().trim()
-        val city = etCity.text.toString().trim()
-
-        if (name.isEmpty() || email.isEmpty() || city.isEmpty()) {
-            showError("Please fill all fields!")
-            return
-        }
-
-        val btnSave = findViewById<Button>(R.id.btnSave)
-        btnSave.isEnabled = false
-        btnSave.text = "Saving..."
-
-        val updates = hashMapOf<String, Any>(
-            "fullName" to name,
-            "email" to email,
-            "city" to city
+        val data = hashMapOf(
+            "fullName" to etName.text.toString(),
+            "email" to etEmail.text.toString(),
+            "city" to etCity.text.toString()
         )
 
-        // Save local photo path to Firestore
-        selectedImageUri?.let { uri ->
-            val savedPath = saveImageLocally(uri)
-            if (savedPath != null) {
-                updates["localPhotoPath"] = savedPath
-            }
-        }
-
-        db.collection("users").document(userId)
-            .set(updates, com.google.firebase.firestore.SetOptions.merge())
+        db.collection("users").document(uid)
+            .set(data)
             .addOnSuccessListener {
-                btnSave.isEnabled = true
-                btnSave.text = "Save"
-                showSuccess("Profile updated successfully! ✅")
+                showSuccess("Profile saved")
             }
-            .addOnFailureListener { e ->
-                btnSave.isEnabled = true
-                btnSave.text = "Save"
-                showError("Failed to update: ${e.message}")
+            .addOnFailureListener {
+                showError("Save failed")
             }
     }
 
-    private fun saveImageLocally(uri: Uri): String? {
-        return try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val file = File(filesDir, "profile_photo.jpg")
-            val outputStream = file.outputStream()
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
-            file.absolutePath
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    // ================= UI =================
+
+    private fun showError(msg: String) {
+        Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show()
     }
 
-    private fun showError(message: String) {
-        val snackbar = Snackbar.make(
-            findViewById(android.R.id.content),
-            message, Snackbar.LENGTH_LONG
-        )
-        snackbar.setBackgroundTint(android.graphics.Color.parseColor("#D32F2F"))
-        snackbar.setTextColor(android.graphics.Color.WHITE)
-        snackbar.setAction("OK") { snackbar.dismiss() }
-        snackbar.show()
-    }
-
-    private fun showSuccess(message: String) {
-        val snackbar = Snackbar.make(
-            findViewById(android.R.id.content),
-            message, Snackbar.LENGTH_LONG
-        )
-        snackbar.setBackgroundTint(android.graphics.Color.parseColor("#1E6F43"))
-        snackbar.setTextColor(android.graphics.Color.WHITE)
-        snackbar.show()
+    private fun showSuccess(msg: String) {
+        Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show()
     }
 }
